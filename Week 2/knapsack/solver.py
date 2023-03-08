@@ -4,6 +4,8 @@
 from collections import namedtuple
 Item = namedtuple("Item", ['index', 'value', 'weight'])
 
+import sys
+sys.setrecursionlimit(100000)
 
 def sort_items(items):
     
@@ -35,7 +37,7 @@ def dummy_solver(items, current_index, current_value, current_capacity,
             current_selection[current_index] = 1
             new_value = current_value + item.value
             current_max = max_value(items[current_index+1:], new_value, new_capacity)
-            if current_max < actual_max:
+            if current_max <= actual_max:
                 pass
             else:
                 if new_value > actual_max:
@@ -52,7 +54,7 @@ def dummy_solver(items, current_index, current_value, current_capacity,
 #         print(current_max)
 #         print(current_selection)
 
-        if current_max < actual_max:
+        if current_max <= actual_max:
             pass
         else:
             if new_value > actual_max:
