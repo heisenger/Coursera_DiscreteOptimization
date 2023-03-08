@@ -4,6 +4,75 @@
 from collections import namedtuple
 Item = namedtuple("Item", ['index', 'value', 'weight'])
 
+
+def sort_items(items):
+    
+    return sorted(items, key=lambda items: (items.value / items.weight, 1/items.weight), reverse=True)   
+
+def max_value(sorted_items, current_value, capacity):
+    additional_value = 0
+    for i in sorted_items:
+#         print(i.weight)
+        if capacity >= 0:
+#             print(capacity)
+            weight_taken = min(i.weight, capacity)
+            capacity -= weight_taken
+#             print(capacity)
+            additional_value += i.value * weight_taken / i.weight
+#             print(additional_value)
+    
+    return additional_value + current_value
+
+def dummy_solver(items, current_index, current_value, current_capacity, 
+                 actual_max, current_selection, max_selection):
+
+    if current_index < len(items):
+        item = items[current_index] 
+        if item.weight <= current_capacity:
+            new_capacity = current_capacity - item.weight
+            current_selection[current_index] = 1
+            new_value = current_value + item.value
+            current_max = max_value(items[current_index+1:], new_value, new_capacity)
+            if new_value > actual_max:
+                max_selection = current_selection
+                actual_max = new_value
+
+            if current_max < actual_max:
+                pass
+
+            else:
+                max_selection = dummy_solver(items, current_index+1, new_value, new_capacity, actual_max, 
+                             current_selection, max_selection)
+
+        else:
+            new_capacity = current_capacity
+            current_selection[current_index] = 0
+            new_value = current_value 
+            current_max = max_value(items[current_index+1:], new_value, new_capacity)
+
+            if new_value > actual_max:
+                max_selection = current_selection
+                actual_max = new_value
+
+            if current_max < actual_max:
+                pass
+
+            else:
+                max_selection = dummy_solver(items, current_index+1, new_value, new_capacity, actual_max, 
+                             current_selection, max_selection)
+
+    return max_selection
+
+def final_solution(items, sorted_items, solution):
+    answer = [0]*len(items)
+    value = 0
+    for i in range(len(solution)):
+        if solution[i] == 1:
+            value += sorted_items[i].value
+            answer[sorted_items[i].index]=1
+
+    return answer, value
+
 def solve_it(input_data):
     # Modify this code to run your optimization algorithm
 
@@ -21,17 +90,21 @@ def solve_it(input_data):
         parts = line.split()
         items.append(Item(i-1, int(parts[0]), int(parts[1])))
 
+    sorted_items = sort_items(items)
+    solution = dummy_solver(sorted_items, 0, 0, capacity, 0, [0]*item_count, [0]*item_count)
+    taken, value = final_solution(items, sorted_items, solution)
+
     # a trivial algorithm for filling the knapsack
     # it takes items in-order until the knapsack is full
-    value = 0
-    weight = 0
-    taken = [0]*len(items)
+    # value = 0
+    # weight = 0
+    # taken = [0]*len(items)
 
-    for item in items:
-        if weight + item.weight <= capacity:
-            taken[item.index] = 1
-            value += item.value
-            weight += item.weight
+    # for item in items:
+    #     if weight + item.weight <= capacity:
+    #         taken[item.index] = 1
+    #         value += item.value
+    #         weight += item.weight
     
     # prepare the solution in the specified output format
     output_data = str(value) + ' ' + str(0) + '\n'
