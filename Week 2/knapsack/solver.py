@@ -28,40 +28,45 @@ def dummy_solver(items, current_index, current_value, current_capacity,
 
     if current_index < len(items):
         item = items[current_index] 
+        
+        # try adding this item
         if item.weight <= current_capacity:
             new_capacity = current_capacity - item.weight
             current_selection[current_index] = 1
             new_value = current_value + item.value
             current_max = max_value(items[current_index+1:], new_value, new_capacity)
-            if new_value > actual_max:
-                max_selection = current_selection
-                actual_max = new_value
-
             if current_max < actual_max:
                 pass
-
             else:
-                max_selection = dummy_solver(items, current_index+1, new_value, new_capacity, actual_max, 
+                if new_value > actual_max:
+                    max_selection = current_selection[:]
+                    actual_max = new_value
+                max_selection, actual_max = dummy_solver(items, current_index+1, new_value, new_capacity, actual_max, 
                              current_selection, max_selection)
 
+        # try not adding this item
+        new_capacity = current_capacity
+        current_selection[current_index] = 0
+        new_value = current_value 
+        current_max = max_value(items[current_index+1:], new_value, new_capacity)
+#         print(current_max)
+#         print(current_selection)
+
+        if current_max < actual_max:
+            pass
         else:
-            new_capacity = current_capacity
-            current_selection[current_index] = 0
-            new_value = current_value 
-            current_max = max_value(items[current_index+1:], new_value, new_capacity)
-
             if new_value > actual_max:
-                max_selection = current_selection
+#                 print(new_value, actual_max)
+                max_selection = current_selection[:]
+    #             print(max_selection)
                 actual_max = new_value
 
-            if current_max < actual_max:
-                pass
 
-            else:
-                max_selection = dummy_solver(items, current_index+1, new_value, new_capacity, actual_max, 
+            max_selection, actual_max = dummy_solver(items, current_index+1, new_value, new_capacity, actual_max, 
                              current_selection, max_selection)
+#         print(max_selection)
+    return max_selection, actual_max
 
-    return max_selection
 
 def final_solution(items, sorted_items, solution):
     answer = [0]*len(items)
@@ -91,7 +96,7 @@ def solve_it(input_data):
         items.append(Item(i-1, int(parts[0]), int(parts[1])))
 
     sorted_items = sort_items(items)
-    solution = dummy_solver(sorted_items, 0, 0, capacity, 0, [0]*item_count, [0]*item_count)
+    solution, max_value = dummy_solver(sorted_items, 0, 0, capacity, 0, [0]*item_count, [0]*item_count)
     taken, value = final_solution(items, sorted_items, solution)
 
     # a trivial algorithm for filling the knapsack
